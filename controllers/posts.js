@@ -129,7 +129,7 @@ const store = (req, res) => {
 
     if (req.is('application/x-www-form-urlencoded') || req.is('multipart/form-data')) {
         const { title, content, tags } = req.body;
-        const image = req.file;  
+        const image = req.file;
 
         if (!title || !content || !tags || !image) {
             image?.filename && deleteFile(image.filename);
@@ -166,10 +166,31 @@ const store = (req, res) => {
     }
 };
 
+//destroy controller for delete posts by slug
+const destroy = (req, res) => {
+    const post = posts.find(p => p.slug === req.params.slug);
+
+    if (post.image.filename) deleteFile(post.image.filename);
+
+    const newPosts = posts.filter(p => p.slug !== req.params.slug);
+
+    updatePosts(newPosts);
+
+    res.format({
+        html: (req, res) => {
+            res.redirect('/posts');
+        },
+
+        default: () => {
+            res.status(200).send('post deleted');
+        }
+    });
+};
 
 module.exports = {
     index,
     show,
     downloadImage,
-    store
+    store,
+    destroy
 }
